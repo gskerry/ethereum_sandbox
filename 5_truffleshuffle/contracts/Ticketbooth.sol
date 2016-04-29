@@ -1,15 +1,20 @@
 
+// **************************
+// intro smart contract courtesy of guidance from: 
+// https://consensys.github.io/developers/articles/101-noob-intro
+// ************************
+
 contract Ticketbooth {
-	address public organizer;
+	address public owner;
 	mapping (address => uint) registrantsPaid;
 	uint public numRegistrants;
 	uint public quota;
 
-	event Deposit(address _from, uint _amount); 
+	event Deposit(address _from, uint _amount); // (!) optional... just logged in EVM logs
 	event Refund(address _to, uint _amount);
 
 	function Conference(){
-		organizer = msg.sender;
+		owner = msg.sender;
 		quota = 500;
 		numRegistrants = 0;
 	}
@@ -20,19 +25,19 @@ contract Ticketbooth {
 		} else {
 			registrantsPaid[msg.sender] = msg.value;
 			numRegistrants++;
-			Deposit(msg.sender, msg.value);
+			Deposit(msg.sender, msg.value); // optional per above.
 			return true;
 		}
 
 	}
 
 	function changeQuota(uint newquota) public {
-		if (msg.sender != organizer){ return; }
+		if (msg.sender != owner){ return; }
 		quota = newquota;
 	}
 
 	function refundTicket(address recipient, uint amount) public {
-		if (msg.sender != organizer){ return; }
+		if (msg.sender != owner){ return; }
 		if(registrantsPaid[recipient] == amount){
 			address myAddress = this;
 			if (myAddress.balance >= amount){
@@ -45,8 +50,8 @@ contract Ticketbooth {
 	}
 
 	function destroy(){
-		if(msg.sender == organizer){
-			suicide(organizer);
+		if(msg.sender == owner){
+			suicide(owner);
 		}
 	}
 
